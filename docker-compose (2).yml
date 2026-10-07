@@ -1,0 +1,32 @@
+# InfluxDB 2 + Grafana + Node-RED (uses CQU's MQTT broker, so no Mosquitto here)
+# Start: docker compose up -d      Stop: docker compose down
+services:
+  influxdb:
+    image: influxdb:2
+    ports: ["8086:8086"]
+    environment:
+      DOCKER_INFLUXDB_INIT_MODE: setup
+      DOCKER_INFLUXDB_INIT_USERNAME: admin
+      DOCKER_INFLUXDB_INIT_PASSWORD: change-me-12345
+      DOCKER_INFLUXDB_INIT_ORG: cqu
+      DOCKER_INFLUXDB_INIT_BUCKET: iot_garden
+      DOCKER_INFLUXDB_INIT_ADMIN_TOKEN: cqu-iot-token-change-me
+    volumes: [influx_data:/var/lib/influxdb2]
+
+  grafana:
+    image: grafana/grafana
+    ports: ["3000:3000"]
+    depends_on: [influxdb]
+    volumes: [grafana_data:/var/lib/grafana]
+
+  nodered:
+    image: nodered/node-red
+    ports: ["1880:1880"]
+    dns: [8.8.8.8, 1.1.1.1]
+    depends_on: [influxdb]
+    volumes: [nodered_data:/data]
+
+volumes:
+  influx_data:
+  grafana_data:
+  nodered_data:
