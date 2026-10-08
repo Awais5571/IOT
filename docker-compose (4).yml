@@ -1,0 +1,29 @@
+services:
+  mosquitto:
+    image: eclipse-mosquitto:2
+    network_mode: host
+    volumes: ["./mosquitto.conf:/mosquitto/config/mosquitto.conf"]
+  influxdb:
+    image: influxdb:2
+    network_mode: host
+    environment:
+      DOCKER_INFLUXDB_INIT_MODE: setup
+      DOCKER_INFLUXDB_INIT_USERNAME: admin
+      DOCKER_INFLUXDB_INIT_PASSWORD: change-me-12345
+      DOCKER_INFLUXDB_INIT_ORG: cqu
+      DOCKER_INFLUXDB_INIT_BUCKET: iot_garden
+      DOCKER_INFLUXDB_INIT_ADMIN_TOKEN: cqu-iot-token-change-me
+    volumes: [influx_data:/var/lib/influxdb2]
+  grafana:
+    image: grafana/grafana
+    network_mode: host
+    depends_on: [influxdb]
+    volumes: [grafana_data:/var/lib/grafana]
+  nodered:
+    image: nodered/node-red
+    network_mode: host
+    depends_on: [influxdb, mosquitto]
+    volumes: ["./nodered_data:/data"]
+volumes:
+  influx_data:
+  grafana_data:
